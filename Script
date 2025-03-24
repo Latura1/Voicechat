@@ -2,7 +2,7 @@ local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/
 
 local Window = Fluent:CreateWindow({
     Title = "German Hangout" .. Fluent.Version,
-    SubTitle = "by L4tua",
+    SubTitle = "by L4tura",
     TabWidth = 160,
     Size = UDim2.fromOffset(460, 360),
     Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
