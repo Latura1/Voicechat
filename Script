@@ -1,0 +1,81 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "German Hangout" .. Fluent.Version,
+    SubTitle = "by L4tura",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(460, 360),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Amethyst",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+-- Fluent provides Lucide Icons, they are optional
+local Tabs = {
+    Voice = Window:AddTab({ Title = "Voice", Icon = "" }),
+    Character = Window:AddTab({ Title = "Character", Icon = "" }),
+    Scripts = Window:AddTab({ Title = "Scripts", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+Tabs.Scripts:AddButton({
+    Title = "Banger",
+    Description = "banger script",
+    Callback = function()
+        loadstring(game:HttpGet("https://pastebin.com/raw/pPCkzSJG"))()
+    end
+})
+
+Tabs.Scripts:AddButton({
+    Title = "Fly",
+    Description = "F for fly | X for Mode Switch",
+    Callback = function()
+        local success, response = pcall(function()
+    return game:HttpGet("https://pastebin.com/raw/My57idN9")
+end)
+
+if success then
+    print("Skript geladen:", response)
+    local runSuccess, errorMsg = pcall(function()
+        loadstring(response)()
+    end)
+    
+    if not runSuccess then
+        warn("Fehler im Skript: " .. errorMsg)
+    end
+else
+    warn("Fehler beim Laden des Skripts!")
+end
+
+    end
+})
+
+
+-- Hier wird der Button korrekt zum "Voice"-Tab hinzugefügt
+Tabs.Voice:AddButton({
+    Title = "Unban",
+    Description = "Gets you unbanned",
+    Callback = function()
+        local voiceChatService = game:GetService("VoiceChatService")
+        voiceChatService:joinVoice()
+    end
+})
+
+-- Slider für den Speed-Mod
+local SpeedSlider = Tabs.Character:AddSlider("SpeedSlider", 
+{
+    Title = "Speed",
+    Description = "Set the Speed",
+    Default = 16,
+    Min = 16,
+    Max = 200,
+    Rounding = 1,
+    Callback = function(Value)
+        print("Slider was changed:", Value)
+        
+        -- Das Speed-Mod-Skript mit dem Slider-Wert ausführen
+        getgenv().Enabled = true -- Ändere dies auf false, um den Mod zu deaktivieren
+        getgenv().Speed = Value -- Setze die Geschwindigkeit auf den Slider-Wert
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/eclipsology/SimpleSpeed/main/SimpleSpeed.lua"))()
+    end
+})
