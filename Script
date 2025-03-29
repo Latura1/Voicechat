@@ -5,7 +5,7 @@ local Window = Fluent:CreateWindow({
     SubTitle = "by L4tura",
     TabWidth = 160,
     Size = UDim2.fromOffset(460, 360),
-    Acrylic = true, -- Blur ausschalten = false
+    Acrylic = true,
     Theme = "Amethyst",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
@@ -19,27 +19,83 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
---Sections
-
---Voice
+-- Sections
 local VoiceSection = Tabs.Voice:AddSection("Voice")
---Character
 local CharacterSection = Tabs.Character:AddSection("Charakter")
---Misc
+local DropdownSection = Tabs.Misc:AddSection("Teleport")
 local EspSection = Tabs.Misc:AddSection("ESP")
---Scripts
 local ScriptsSection = Tabs.Scripts:AddSection("Scripts")
---Settings
 local VersionSection = Tabs.Settings:AddSection("Version")
 local CreditSection = Tabs.Settings:AddSection("Credits")
 
+-- Spieler Teleport Dropdown
+local selectedPlayerName = nil
 
+local function teleportToPlayer()
+    if not selectedPlayerName or selectedPlayerName == "Select Player" then
+        warn("Kein gültiger Spieler ausgewählt!")
+        return
+    end
 
---Buttons
+    local player = game.Players:FindFirstChild(selectedPlayerName)
+    if player and player.Character then
+        local character = player.Character
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        local playerHRP = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
---EspToggle
-EspSection:AddToggle("MyToggle", 
-{
+        if hrp and playerHRP then
+            playerHRP.CFrame = hrp.CFrame
+        else
+            warn("HumanoidRootPart nicht gefunden!")
+        end
+    else
+        warn("Spieler nicht gefunden oder hat keinen Charakter!")
+    end
+end
+
+local players = {"Select Player"}
+for _, player in ipairs(game.Players:GetPlayers()) do
+    table.insert(players, player.Name)
+end
+
+local Dropdown = DropdownSection:AddDropdown("Dropdown", {
+    Title = "Teleport",
+    Description = "select,
+    Values = players,
+    Multi = false,
+    Default = 1,
+    Callback = function(value)
+        selectedPlayerName = value
+    end
+})
+
+DropdownSection:AddButton({
+    Title = "Teleport",
+    Description = "teleport to player",
+    Callback = function()
+        teleportToPlayer()
+    end
+})
+
+-- Spieler-Update-Events
+game.Players.PlayerAdded:Connect(function(player)
+    table.insert(players, player.Name)
+    Dropdown:SetValues(players)
+end)
+
+game.Players.PlayerRemoving:Connect(function(player)
+    for i, name in ipairs(players) do
+        if name == player.Name then
+            table.remove(players, i)
+            break
+        end
+    end
+    Dropdown:SetValues(players)
+end)
+--dropdown teleport end
+
+-- EspToggle
+EspSection:AddToggle("MyToggle", {
     Title = "Esp Toggle", 
     Description = "Lets you toggle ESP",
     Default = false,
@@ -52,7 +108,7 @@ EspSection:AddToggle("MyToggle",
     end 
 })
 
---BangerButton
+-- Scripts-Buttons
 ScriptsSection:AddButton({
     Title = "Banger",
     Description = "banger script",
@@ -61,7 +117,6 @@ ScriptsSection:AddButton({
     end
 })
 
---FlyButton
 ScriptsSection:AddButton({
     Title = "Fly",
     Description = "F for fly | X for Mode Switch",
@@ -95,9 +150,7 @@ VoiceSection:AddButton({
     end
 })
 
---Slider
-
---Speed-Slider
+-- Speed-Slider
 local SpeedSlider = CharacterSection:AddSlider("SpeedSlider", {
     Title = "Speed",
     Description = "Set the Speed",
@@ -107,12 +160,8 @@ local SpeedSlider = CharacterSection:AddSlider("SpeedSlider", {
     Rounding = 1,
     Callback = function(Value)
         print("Slider geändert:", Value)
-
-        -- Speed-Mod aktivieren
         getgenv().Enabled = true
         getgenv().Speed = Value
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eclipsology/SimpleSpeed/main/SimpleSpeed.lua"))()
     end
 })
-
-
