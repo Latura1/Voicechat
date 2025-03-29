@@ -1,24 +1,59 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
 local Window = Fluent:CreateWindow({
-    Title = "German Hangout" .. Fluent.Version,
+    Title = "German Hangout " .. Fluent.Version,
     SubTitle = "by L4tura",
     TabWidth = 160,
     Size = UDim2.fromOffset(460, 360),
-    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Acrylic = true, -- Blur ausschalten = false
     Theme = "Amethyst",
-    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+    MinimizeKey = Enum.KeyCode.LeftControl
 })
 
--- Fluent provides Lucide Icons, they are optional
+-- Tabs erstellen
 local Tabs = {
-    Voice = Window:AddTab({ Title = "Voice", Icon = "" }),
-    Character = Window:AddTab({ Title = "Character", Icon = "" }),
-    Scripts = Window:AddTab({ Title = "Scripts", Icon = "" }),
+    Voice = Window:AddTab({ Title = "Voice", Icon = "mic" }),
+    Character = Window:AddTab({ Title = "Character", Icon = "user" }),
+    Misc = Window:AddTab({ Title = "Misc", Icon = "component" }),
+    Scripts = Window:AddTab({ Title = "Scripts", Icon = "scroll" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
-Tabs.Scripts:AddButton({
+--Sections
+
+--Voice
+local VoiceSection = Tabs.Voice:AddSection("Voice")
+--Character
+local CharacterSection = Tabs.Character:AddSection("Charakter")
+--Misc
+local EspSection = Tabs.Misc:AddSection("ESP")
+--Scripts
+local ScriptsSection = Tabs.Scripts:AddSection("Scripts")
+--Settings
+local VersionSection = Tabs.Settings:AddSection("Version")
+local CreditSection = Tabs.Settings:AddSection("Credits")
+
+
+
+--Buttons
+
+--EspToggle
+EspSection:AddToggle("MyToggle", 
+{
+    Title = "Esp Toggle", 
+    Description = "Lets you toggle ESP",
+    Default = false,
+    Callback = function(state)
+        if state then
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Latura1/Voicechat/refs/heads/main/Esp%20on"))()
+        else
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/Latura1/Voicechat/refs/heads/main/Esp%20off"))()
+        end
+    end 
+})
+
+--BangerButton
+ScriptsSection:AddButton({
     Title = "Banger",
     Description = "banger script",
     Callback = function()
@@ -26,33 +61,32 @@ Tabs.Scripts:AddButton({
     end
 })
 
-Tabs.Scripts:AddButton({
+--FlyButton
+ScriptsSection:AddButton({
     Title = "Fly",
     Description = "F for fly | X for Mode Switch",
     Callback = function()
         local success, response = pcall(function()
-    return game:HttpGet("https://pastebin.com/raw/My57idN9")
-end)
+            return game:HttpGet("https://pastebin.com/raw/My57idN9")
+        end)
 
-if success then
-    print("Skript geladen:", response)
-    local runSuccess, errorMsg = pcall(function()
-        loadstring(response)()
-    end)
-    
-    if not runSuccess then
-        warn("Fehler im Skript: " .. errorMsg)
-    end
-else
-    warn("Fehler beim Laden des Skripts!")
-end
-
+        if success then
+            print("Skript geladen:", response)
+            local runSuccess, errorMsg = pcall(function()
+                loadstring(response)()
+            end)
+            
+            if not runSuccess then
+                warn("Fehler im Skript: " .. errorMsg)
+            end
+        else
+            warn("Fehler beim Laden des Skripts!")
+        end
     end
 })
 
-
--- Hier wird der Button korrekt zum "Voice"-Tab hinzugefügt
-Tabs.Voice:AddButton({
+-- Voice-Tab Buttons
+VoiceSection:AddButton({
     Title = "Unban",
     Description = "Gets you unbanned",
     Callback = function()
@@ -61,9 +95,10 @@ Tabs.Voice:AddButton({
     end
 })
 
--- Slider für den Speed-Mod
-local SpeedSlider = Tabs.Character:AddSlider("SpeedSlider", 
-{
+--Slider
+
+--Speed-Slider
+local SpeedSlider = CharacterSection:AddSlider("SpeedSlider", {
     Title = "Speed",
     Description = "Set the Speed",
     Default = 16,
@@ -71,11 +106,13 @@ local SpeedSlider = Tabs.Character:AddSlider("SpeedSlider",
     Max = 200,
     Rounding = 1,
     Callback = function(Value)
-        print("Slider was changed:", Value)
-        
-        -- Das Speed-Mod-Skript mit dem Slider-Wert ausführen
-        getgenv().Enabled = true -- Ändere dies auf false, um den Mod zu deaktivieren
-        getgenv().Speed = Value -- Setze die Geschwindigkeit auf den Slider-Wert
+        print("Slider geändert:", Value)
+
+        -- Speed-Mod aktivieren
+        getgenv().Enabled = true
+        getgenv().Speed = Value
         loadstring(game:HttpGet("https://raw.githubusercontent.com/eclipsology/SimpleSpeed/main/SimpleSpeed.lua"))()
     end
 })
+
+
