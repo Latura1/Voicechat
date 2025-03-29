@@ -1,1 +1,65 @@
-asdas
+--//Toggle\\--
+getgenv().Toggle = true -- ESP an/aus
+getgenv().TC = false -- Team Check an/aus
+local PlayerName = "Name" -- "DisplayName" oder "Name"
+
+--//Variablen\\--
+local P = game:GetService("Players")
+local LP = P.LocalPlayer
+
+--//Funktion zum Entfernen von ESP\\--
+local function removeESP()
+	for _, v in pairs(P:GetChildren()) do
+		if v:IsA("Player") and v.Character then
+			if v.Character:FindFirstChild("Totally NOT Esp") then
+				v.Character:FindFirstChild("Totally NOT Esp"):Destroy()
+			end
+			if v.Character:FindFirstChild("Icon") then
+				v.Character:FindFirstChild("Icon"):Destroy()
+			end
+		end
+	end
+end
+
+--//Hauptloop\\--
+while task.wait() do
+	if not getgenv().Toggle then
+		removeESP() -- Löscht das ESP, wenn es deaktiviert wird
+		break
+	end
+
+	for _, v in pairs(P:GetChildren()) do
+		if v:IsA("Player") and v ~= LP and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+			local pos = math.floor((LP.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).magnitude)
+
+			-- Team Check Logik
+			if (getgenv().TC == false or (getgenv().TC == true and v.TeamColor ~= LP.TeamColor)) then
+				if not v.Character:FindFirstChild("Totally NOT Esp") then
+					local ESP = Instance.new("Highlight", v.Character)
+					ESP.Name = "Totally NOT Esp"
+					ESP.Adornee = v.Character
+					ESP.FillColor = v.TeamColor.Color
+					ESP.FillTransparency = 0.5
+					ESP.OutlineColor = Color3.fromRGB(255, 255, 255)
+
+					local Icon = Instance.new("BillboardGui", v.Character)
+					local ESPText = Instance.new("TextLabel", Icon)
+					Icon.Name = "Icon"
+					Icon.AlwaysOnTop = true
+					Icon.ExtentsOffset = Vector3.new(0, 1, 0)
+					Icon.Size = UDim2.new(0, 800, 0, 50)
+
+					ESPText.Name = "ESP Text"
+					ESPText.BackgroundTransparency = 1
+					ESPText.Size = UDim2.new(0, 800, 0, 50)
+					ESPText.Font = Enum.Font.SciFi
+					ESPText.Text = v[PlayerName] .. " | Distance: " .. pos
+					ESPText.TextColor3 = v.TeamColor.Color
+					ESPText.TextSize = 18
+				else
+					v.Character:FindFirstChild("Icon")["ESP Text"].Text = v[PlayerName] .. " | Distance: " .. pos
+				end
+			end
+		end
+	end
+end
