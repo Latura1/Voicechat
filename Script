@@ -59,8 +59,8 @@ for _, player in ipairs(game.Players:GetPlayers()) do
 end
 
 local Dropdown = DropdownSection:AddDropdown("Dropdown", {
-    Title = "Teleport",
-    Description = "select,
+    Title = "Teleport zu Spieler",
+    Description = "Wähle einen Spieler aus",
     Values = players,
     Multi = false,
     Default = 1,
@@ -71,7 +71,7 @@ local Dropdown = DropdownSection:AddDropdown("Dropdown", {
 
 DropdownSection:AddButton({
     Title = "Teleport",
-    Description = "teleport to player",
+    Description = "Teleportiert dich zum ausgewählten Spieler",
     Callback = function()
         teleportToPlayer()
     end
@@ -92,7 +92,6 @@ game.Players.PlayerRemoving:Connect(function(player)
     end
     Dropdown:SetValues(players)
 end)
---dropdown teleport end
 
 -- EspToggle
 EspSection:AddToggle("MyToggle", {
