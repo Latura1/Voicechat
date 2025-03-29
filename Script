@@ -5,7 +5,7 @@ local Window = Fluent:CreateWindow({
     SubTitle = "by L4tura",
     TabWidth = 160,
     Size = UDim2.fromOffset(460, 360),
-    Acrylic = true,
+    Acrylic = true, -- Blur ausschalten = false
     Theme = "Amethyst",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
@@ -44,7 +44,7 @@ local function teleportToPlayer()
         local playerHRP = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 
         if hrp and playerHRP then
-            playerHRP.CFrame = hrp.CFrame
+            playerHRP.CFrame = hrp.CFrame  -- Teleportiere dich zum Spieler
         else
             warn("HumanoidRootPart nicht gefunden!")
         end
@@ -54,6 +54,13 @@ local function teleportToPlayer()
 end
 
 local players = {"Select Player"}
+
+local function updateDropdown()
+    task.wait(0.2)  -- Kleine Verzögerung, um unnötige Updates zu reduzieren
+    Dropdown:SetValues(players)
+end
+
+-- Spieler zu Dropdown hinzufügen
 for _, player in ipairs(game.Players:GetPlayers()) do
     table.insert(players, player.Name)
 end
@@ -80,17 +87,17 @@ DropdownSection:AddButton({
 -- Spieler-Update-Events
 game.Players.PlayerAdded:Connect(function(player)
     table.insert(players, player.Name)
-    Dropdown:SetValues(players)
+    updateDropdown()
 end)
 
 game.Players.PlayerRemoving:Connect(function(player)
-    for i, name in ipairs(players) do
-        if name == player.Name then
+    for i = #players, 1, -1 do
+        if players[i] == player.Name then
             table.remove(players, i)
             break
         end
     end
-    Dropdown:SetValues(players)
+    updateDropdown()
 end)
 
 -- EspToggle
