@@ -5,7 +5,7 @@ local Window = Fluent:CreateWindow({
     SubTitle = "by L4tura",
     TabWidth = 160,
     Size = UDim2.fromOffset(460, 360),
-    Acrylic = true, -- Blur ausschalten = false
+    Acrylic = false, -- Blur ausschalten = false
     Theme = "Amethyst",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
