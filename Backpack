@@ -1,0 +1,176 @@
+-- Einfacher Backpack Script mit Toggle und Sitzposition
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local targetName = "" -- Spielername hier ändern
+local connection = nil
+local enabled = true
+
+local function findTargetPlayer()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and (string.lower(player.Name) == string.lower(targetName) or 
+           (player.DisplayName and string.lower(player.DisplayName) == string.lower(targetName))) then
+            return player
+        end
+    end
+    return nil
+end
+
+local function stopBackpack()
+    if connection then
+        connection:Disconnect()
+        connection = nil
+    end
+    
+    local myChar = LocalPlayer.Character
+    if myChar then
+        local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+        if myHRP then
+            myHRP.CanCollide = true
+        end
+        
+        -- Verlasse Sitzposition
+        local humanoid = myChar:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.Sit = false
+        end
+    end
+    
+    print("Backpack gestoppt")
+end
+
+local function attachToBack()
+    if not enabled then return end
+    
+    stopBackpack() -- Alte Verbindung stoppen
+    
+    local targetPlayer = findTargetPlayer()
+    if not targetPlayer then
+        warn("Zielspieler '" .. targetName .. "' nicht gefunden")
+        return false
+    end
+    
+    if not targetPlayer.Character then
+        warn("Zielspieler hat keinen Character")
+        return false
+    end
+    
+    local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local myChar = LocalPlayer.Character
+    if not targetHRP or not myChar then return false end
+    
+    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+    local myHumanoid = myChar:FindFirstChildOfClass("Humanoid")
+    if not myHRP or not myHumanoid then return false end
+    
+    -- Deaktiviere Kollision für besseres Anhaften
+    myHRP.CanCollide = false
+    
+    -- Gehe in Sitzposition
+    myHumanoid.Sit = true
+    
+    -- Update-Loop für konstante Position am Rücken
+    connection = RunService.Heartbeat:Connect(function()
+        if not enabled or not targetHRP or not targetHRP.Parent or not myHRP or not myHRP.Parent then
+            stopBackpack()
+            return
+        end
+        
+        -- RÜCKEN-Position (hinter der Person)
+        local backOffset = CFrame.new(0, 0.3, 1) * CFrame.Angles(0, math.rad(180), 0)-- Hinten und etwas niedriger für Sitzposition
+        local backPosition = targetHRP.CFrame * backOffset
+        
+        -- Setze Position
+        myHRP.CFrame = backPosition
+        
+        -- Bleibe in Sitzposition
+        if myHumanoid then
+            myHumanoid.Sit = true
+        end
+    end)
+    
+    print("Erfolgreich am Rücken von " .. targetPlayer.Name .. " angehaftet (Sitzposition)")
+    return true
+end
+
+-- Steuerungs-Funktionen
+getgenv().BackpackOn = function()
+    if enabled then
+        print("Backpack ist bereits aktiv")
+        return
+    end
+    enabled = true
+    attachToBack()
+    print("Backpack aktiviert")
+end
+
+getgenv().BackpackOff = function()
+    enabled = false
+    stopBackpack()
+    print("Backpack deaktiviert")
+end
+
+getgenv().BackpackToggle = function()
+    if enabled then
+        getgenv().BackpackOff()
+    else
+        getgenv().BackpackOn()
+    end
+end
+
+getgenv().ChangeTarget = function(newName)
+    targetName = newName
+    print("Neues Ziel: " .. targetName)
+    if enabled then
+        attachToBack()
+    end
+end
+
+-- Automatische Initialisierung
+local function initialize()
+    if LocalPlayer.Character then
+        wait(1)
+        if enabled then
+            attachToBack()
+        end
+    end
+
+    LocalPlayer.CharacterAdded:Connect(function(character)
+        wait(2)
+        if enabled then
+            attachToBack()
+        end
+    end)
+
+    local targetPlayer = findTargetPlayer()
+    if targetPlayer then
+        targetPlayer.CharacterAdded:Connect(function(character)
+            wait(3)
+            if enabled then
+                attachToBack()
+            end
+        end)
+    end
+    
+    Players.PlayerAdded:Connect(function(player)
+        if (string.lower(player.Name) == string.lower(targetName) or 
+           (player.DisplayName and string.lower(player.DisplayName) == string.lower(targetName))) then
+            wait(2)
+            if enabled then
+                attachToBack()
+            end
+        end
+    end)
+end
+
+-- Starte das Script
+initialize()
+
+print("=== Backpack Script Geladen ===")
+print("Verfügbare Befehle:")
+print("BackpackOn() - Backpack aktivieren")
+print("BackpackOff() - Backpack deaktivieren") 
+print("BackpackToggle() - An/Aus umschalten")
+print("ChangeTarget('Name') - Ziel ändern")
+print("Aktuelles Ziel: " .. targetName)
